@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: alectiolite
+Version: 0.0.1
+Summary: Alectio Python SDK
+Home-page: https://github.com/alectio/flexible-SDK
+Author: Alectio
+Author-email: arun.ram@alectio.com
+License: UNKNOWN
+Description: # flexible-SDK
+        New SDK format
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6.10
+Classifier: Programming Language :: Python :: 3.7
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
