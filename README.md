@@ -1,2 +1,2 @@
-# flexible-SDK
+# Alectio-lite
 New SDK format
