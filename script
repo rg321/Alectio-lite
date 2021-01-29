@@ -1,4 +1,0 @@
-sudo rm -fr  /home/arun/anaconda3/envs/arun/lib/python3.6/site-packages/alectiolite
-python3 setup.py sdist bdist_wheel
-
-
