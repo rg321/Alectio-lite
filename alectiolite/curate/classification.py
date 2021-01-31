@@ -4,23 +4,23 @@
 import os
 import time
 import logging
-from tqdm import tqdm
-from tqdm import trange
+import boto3
+from rich.table import Table
+from rich.console import Console
 from ..backend.s3_client import S3Client
 from alectiolite.curate.init import init_classification
-from alectiolite.callbacks import DefaultCallback
+from alectiolite.callbacks import AlectioCallback
 
 
+"""
 class operations(DefaultCallback):
     def on_experiment_start():
 
 
-
+"""
 
 __all__ = ['UniClassification']
-
-
-
+console = Console(style ="green")
 
 class UniClassification(init_classification):
     """
@@ -41,10 +41,11 @@ class UniClassification(init_classification):
     _triggertask():
         Triggers an experiment 
     """
-    def __init__(self, token , subset = None , callbacks = None , verbose =True, activation = None):
+    def __init__(self, config , subset = None , callbacks = None , verbose =True, activation = None):
         logging.info('Triggering Alectio jobs to perform curation experiments ')
         logging.info('Sweeping configs')
-        super().__init__(token)
+        super().__init__(config)
+        self.payload = config
         if callbacks is None:
             self.callbacks = []
         else:
@@ -58,23 +59,31 @@ class UniClassification(init_classification):
    
         
     def _printexperimentinfo(self, payload):
-        print('\n')
-        print('Details of your experiment ... ')
+        #console = Console()
+
+        table = Table(show_header=True, header_style="bold magenta")
+        console.print('\n')
+        console.print('Details of your experiment ... ')
+        row_values = []
+        
         for k , v in payload.items():
-            print(str(k)+' :'+str(v))
+            table.add_column(str(k), justify ="center")
+            row_values.append(str(v))
+
+        table.add_row(row_values[0],row_values[1],row_values[2],row_values[3],row_values[4],row_values[5],row_values[6],row_values[7],row_values[8])
+        console.print(table)
 
 
     def fit(self):
-        logging.info('Your experiment status :', self.status)
+        logging.info('Your experiment status :', self.experiment_config.STATUS)
         logging.info('Triggering task ....')
-        self.on_experiment_start()  # A Promise
-        
+             
         if self.verbose:
             self._printexperimentinfo(self.payload)
 
         ########### Meta json #############
         key = os.path.join(self.project_dir, "meta.json")
-        bucket = boto3.resource("s3").Bucket(self.bucket_name)
+        bucket = boto3.resource("s3").Bucket(self.experiment_config.BUCKET_NAME)
         json_load_s3 = lambda f: json.load(bucket.Object(key=f).get()["Body"])
         self.meta_data = json_load_s3(key)
 

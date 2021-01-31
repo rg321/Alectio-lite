@@ -1,8 +1,0 @@
-requests>=2
-aiohttp
-gql
-opencv-python
-asyncio
-aiogqlc
-envyaml
-yacs

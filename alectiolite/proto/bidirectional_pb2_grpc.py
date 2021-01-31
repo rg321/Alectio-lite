@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import alectio_sdk.proto.bidirectional_pb2 as bidirectional__pb2
+import alectiolite.proto.bidirectional_pb2 as bidirectional__pb2
 
 
 class BidirectionalStub(object):

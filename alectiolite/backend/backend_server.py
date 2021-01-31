@@ -7,6 +7,8 @@ import time
 import logging
 from tqdm import tqdm
 from tqdm import trange
+from rich.console import Console
+from rich.table import Table
 
 #import bidirectional_pb2_grpc as bidirectional_pb2_grpc
 #from .bidirectional_pb2_grpc import Bidirectional, BidirectionalStub , BidirectionalServicer
@@ -23,6 +25,7 @@ __all__ = ['BackendServer',
 
 
 GRPCBACKEND = "50.112.116.244:50051"
+console = Console(style ="bold yellow")
 
 
 
@@ -88,29 +91,36 @@ class BackendServer(object):
         return self.payload
 
     def _printexperimentinfo(self, payload):
-        print('\n')
-        print('Details of your experiment ... ')
+
+        table = Table(show_header=True, header_style="bold magenta")
+        console.print('\n')
+        console.print('Details of your experiment ... ')
+        rowstrings =''
+        
         for k , v in payload.items():
-            print(str(k)+' :'+str(v))
+            table.add_column(str(k), justify ="center")
+            rowstrings+str(v)+','
+
+        table.add_row(rowstrings)
+        console.print(table)
     
     def _triggertask(self):
         currtime = 0
-        waittime = 40 # wait time approximately 10 minutes 
-        while True:
-            # Calling Backend servers               
-            response_child = self.getSDKResponse()
-            if response_child['status'] == "Fetched":
-                print("Experiment triggered successfully")
-                print("Setting up curation , hold tight while we crunch some numbers")
-                #one_loop_response = self.one_loop(response_child)
-                return response_child
-            if response_child['status'] == "Failed":
-                with trange(1) as t:
-                    for i in t:
-                        t.set_description('Sending request... ')
-                        t.set_postfix({'Requests sent': currtime})
-                        time.sleep(10)
-                currtime+=1
-                if currtime > waittime:
-                    print("Sorry our servers are offline ,try again later !")
-                    break
+        waittime = 40 # wait time approximately 10 minutes
+        ping_server = ["Request {}".format(n) for n in range(waittime)]
+
+        with console.status("[bold green] Triggering Alectio servers ...") as status:
+            while True:
+                # Calling Backend Servers
+                response_child = self.getSDKResponse()
+                if response_child['status'] == "Fetched":
+                    ping = ping_server.pop(0)
+                    console.print("{} succeeded".format(ping))
+                    console.print("Setting up curation , hold tight while we crunch some numbers")
+                    return response_child
+                if response_child['status'] == "Failed":
+                    ping = ping_server.pop(0)
+                    time.sleep(10)
+                    console.print("{} failed. Retrying ...".format(ping))
+                if not ping_server:
+                    console.print("Sorry out servers are offline, try again later !")

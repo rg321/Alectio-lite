@@ -1,8 +1,11 @@
 import os
-from ..backend.backend_server import BackendServer
 from ..backend.s3_client import S3Client
 
+from ..config import backend_config
+from ..config import update_backend_config
 
+from rich.table import Table
+from rich.console import Console
 
 """
 status :Fetched
@@ -19,83 +22,65 @@ n_loop :10.0
 
 
 __all__ = ['init_classification']
+console = Console(style ="green")
 
 class init_classification:
-    def __init__(self,token):
-        self.token = token
-        self.payload = self._token_controller(token)
+    def __init__(self, config):
+        self.payload = config        
         self._experiment_controller()
 
 
     @property
     def config(self):
-        print("Getting value...")
+        console.print("Getting value...")
         return self.payload
 
     @config.setter
     def config(self, value):
         self.payload = value
-    
-    def _token_controller(self, token):
-        backend = BackendServer(token)
-        exp_info = backend.init_backend()
-        return exp_info
 
+    def _update_experiment_config(self):
+        cfglist = []
+        for k, v in self.payload.items():
+            cfglist.extend([str(k).upper(),v])
+        update_backend_config(backend_config, cfglist)
+        self.experiment_config = backend_config    #### Gets updated for each experiment whenever a call is made to the API
+
+    def _checkdirs(self,dir_ , kind =''):
+        if not os.path.exists(dir_):
+            os.makedirs(dir_,exist_ok =True)
+            console.print("All Alectio {} logs will be saved to {}".format(kind,self.experiment_config.EXPERIMENT_ID))
 
     def _experiment_controller(self):
-    	if bool(self.payload):
-    		self.status = self.payload.get('status')
-    		self.experiment_id = self.payload.get('experiment_id')
-    		self.project_id = self.payload.get('project_id')
-    		self.cur_loop = self.payload.get('cur_loop')
-    		self.user_id = self.payload.get('user_id')
-    		self.bucket_name = self.payload.get('bucket_name')
-    		self.type = self.payload.get('type')
-    		self.n_rec = self.payload.get('n_rec')
-    		self.n_loop = self.payload.get('n_loop')
-    	else:
-    		raise ValueError("No valid experiment details found for current experiment token, please check your token or try again")
+        if bool(self.payload):
+            self._update_experiment_config()            
+        else:
+            raise ValueError("No valid experiment details found for current experiment token, please check your token or try again")
+        if 'classification' not in self.experiment_config.TYPE.lower():
+            raise ValueError("The token seems to be incorrect for the experiment type you are trying to run")
 
-    	if 'classification' not in self.type.lower():
-    		raise ValueError("The token seems to be incorrect for the experiment type you are trying to run")
-    	with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json"), "r") as f:
-    		self.backend_config = json.load(f)
+        self.experiment_log_dir = self.experiment_config.EXPERIMENT_ID
 
-    	self.backend_ip = self.backend_config["backend_ip"]
-    	if self.bucket_name == self.config["sandbox_bucket"]:
-    		self.expt_dir = os.path.join(self.user_id, self.project_id, self.experiment_id)
-    		self.project_dir = os.path.join(self.user_id, self.project_id)
-    	else:
-    		self.expt_dir = os.path.join(self.project_id, self.experiment_id)
-    		self.project_dir = os.path.join(self.project_id)
+        #TO DO : A better solution for buckets , API in works
+        if self.experiment_config.BUCKET_NAME == self.experiment_config.SANDBOX_BUCKET:
+            self.experiment_dir = os.path.join(self.experiment_config.USER_ID,
+                                               self.experiment_config.PROJECT_ID ,
+                                               self.experiment_config.EXPERIMENT_ID
+                                               )
+            self._checkdirs(self.experiment_dir,'experiment')
+            self.project_dir = os.path.join(self.experiment_config.USER_ID,
+                                            self.experiment_config.PROJECT_ID)
+            self._checkdirs(self.project_dir, 'project')
 
-    	
-
-
+        else:
+            self.experiment_dir = os.path.join(self.experiment_config.PROJECT_ID ,
+                                               self.experiment_config.EXPERIMENT_ID
+                                               )
+            self._checkdirs(self.experiment_dir,'experiment')
+            self.project_dir = os.path.join(self.experiment_config.PROJECT_ID)
+            self._checkdirs(self.project_dir,'project')
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
+        

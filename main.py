@@ -1,15 +1,61 @@
+import pickle
 import alectiolite
+from alectiolite.callbacks import AlectioCallback
 
-#from alectiolite.curate import LogitAL
 
 
+# Get token from FE 
 token = 'e33aa51443b743d49d71c8dc9de25932'
 
-exp_info = alectiolite.init.init_experiment_(token)
+data = pickle.load(open('data_map.pkl','rb'))
+inputrecords = {'1': 1111 ,'2': 11111 , '3' : 838383883}
 
-alectiolite
-print("Returned arguments")
-print(exp_info)
+class Alectioreturn(AlectioCallback):
+	def on_infer_start(self):
+
+		return data
+
+	def on_infer_end(self, model_outputs):
+
+		return inputrecords
+
+
+
+
+#print("my config")
+
+config = alectiolite.experiment_config(token = token)
+
+#print(config)
+cb= Alectioreturn()
+alectiolite.curate_classification(config = config , subset = 0, callbacks = [cb])
+
+#Initialize classification
+#cb= Alectioreturn()
+
+
+
+#alectiolite.curate_classification(token = token , subset = 0, callbacks = [cb])
+
+
+
+
+#print("Lets print my config")
+
+#Getconfig
+#alectiolite.curate_classification.config
+
+
+
+
+
+
+
+
+
+
+
+#print(exp_info)
 
 
 

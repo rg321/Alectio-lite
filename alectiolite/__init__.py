@@ -7,8 +7,7 @@ import sys
 import random
 import logging
 import alectiolite
-
-from .init import init_experiment_ 
+from .init import init_experiment_ ,extract_config_
 from .curate.classification import UniClassification as curate_classification
 
 __all__ = ['backend',
@@ -19,10 +18,6 @@ __all__ = ['backend',
            'UniClassification']
 
 
-
-
-
-
-
 init = alectiolite.init_experiment_
+experiment_config = alectiolite.extract_config_
 curate_classification = alectiolite.curate_classification
