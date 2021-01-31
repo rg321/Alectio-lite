@@ -4,6 +4,9 @@ from alectiolite.callbacks import AlectioCallback
 
 
 
+# Steps
+
+
 # Get token from FE 
 token = 'e33aa51443b743d49d71c8dc9de25932'
 
@@ -11,9 +14,10 @@ data = pickle.load(open('data_map.pkl','rb'))
 inputrecords = {'1': 1111 ,'2': 11111 , '3' : 838383883}
 
 class Alectioreturn(AlectioCallback):
-	def on_infer_start(self):
-
-		return data
+	def on_infer_start(self,monitor ,data ,config):
+		alectiolite.alectio_logger(monitor= monitor,
+			               data   = data,
+			               config = config)
 
 	def on_infer_end(self, model_outputs):
 
@@ -22,12 +26,12 @@ class Alectioreturn(AlectioCallback):
 
 
 
-#print("my config")
+
 
 config = alectiolite.experiment_config(token = token)
-
-#print(config)
 cb= Alectioreturn()
+cb.on_infer_start(monitor= 'datasetstate',data = data, config = config)
+print(" I am passing things now ")
 alectiolite.curate_classification(config = config , subset = 0, callbacks = [cb])
 
 #Initialize classification

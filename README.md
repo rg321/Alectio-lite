@@ -12,4 +12,3 @@ conda activate myenv<br />
 
 ## TODO 
 - creating docstrings <br />
-

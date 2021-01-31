@@ -5,7 +5,7 @@ class AlectioCallback(abc.ABC):
 
 
 
-	def on_infer_start(self):
+	def on_infer_start(self,monitor,data,config):
 		pass
 
 
@@ -16,4 +16,3 @@ class AlectioCallback(abc.ABC):
 	def on_experiment_start():
 		pass
 
-	

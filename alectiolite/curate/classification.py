@@ -3,8 +3,9 @@
 
 import os
 import time
-import logging
+import json
 import boto3
+import logging
 from rich.table import Table
 from rich.console import Console
 from ..backend.s3_client import S3Client
@@ -93,13 +94,18 @@ class UniClassification(init_classification):
         
 
     def on_infer_start(self):
+        pass
+        """
+
 
         for cb in self.callbacks:
-            self.data_map = cb.on_infer_start()
-            object_key = os.path.join(self.expt_dir, "data_map_{}.pkl".format(self.subset))
+            cb.on_infer_start()
+            
+            object_key = os.path.join(self.experiment_dir, "data_map_{}.pkl".format(self.subset))
             self.client.multi_part_upload_with_s3(
-                self.data_map, self.bucket_name, object_key, "pickle"
+                self.data_map, self.experiment_config.BUCKET_NAME, object_key, "pickle"
             )
+        """
 
 
 
