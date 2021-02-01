@@ -24,6 +24,10 @@ _C.N_REC = 0.0
 _C.N_LOOP = 0.0
 
 
+# File configs
+_C.OUTFILES = ('metrics' ,'test_predictions','datasetstate','pre_softmax')
+_C.INFILES = ('meta' , 'labeled_pool' ,'selected_indices')
+
 
 
 

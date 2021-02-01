@@ -1,5 +1,5 @@
-from .logger import pickle_logger
+from .logger import experiment_logger
 
 
 
-__all__ = ['pickle_logger']
+__all__ = ['experiment_logger']

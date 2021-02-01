@@ -5,12 +5,13 @@ import os
 import time
 import json
 import boto3
+import pickle
 import logging
 from rich.table import Table
 from rich.console import Console
 from ..backend.s3_client import S3Client
 from alectiolite.curate.init import init_classification
-from alectiolite.callbacks import AlectioCallback
+from alectiolite.callbacks import CurateCallback
 
 
 """
@@ -82,14 +83,32 @@ class UniClassification(init_classification):
         if self.verbose:
             self._printexperimentinfo(self.payload)
 
-        ########### Meta json #############
-        key = os.path.join(self.project_dir, "meta.json")
-        bucket = boto3.resource("s3").Bucket(self.experiment_config.BUCKET_NAME)
-        json_load_s3 = lambda f: json.load(bucket.Object(key=f).get()["Body"])
-        self.meta_data = json_load_s3(key)
+        ##### Call necessary deterministic callbacks
+        for cb in self.callbacks:
+            cb.on_project_start(monitor= "meta",
+                                data = None,
+                                config = self.config)
+            cb.on_train_start(monitor= "selected_indices",
+                              data = None,
+                              config = self.config)
+
+        if self.experiment_config.CUR_LOOP =='':
+            self.selected_file = os.path.join(self.experiment_dir, 'selected_indices.pkl')
+        elif self.experiment_config.CUR_LOOP >= 0:
+            self.selected_file = os.path.join(self.experiment_dir, 'selected_indices_{}.pkl'.format(self.experiment_config.CUR_LOOP))
+        else:
+            raise ValueError("Invalid experiment loop value chosen to monitor / you must pass previous loops output to Alectio for this operatio")
+
+
+
+
+
+        #selected = self._read_pickle(selected_file)
+
+        #return selected
 
         
-        self.on_infer_start()
+        #self.on_infer_start()
         #self.on_infer_end()
         
 
