@@ -1,2 +1,2 @@
-# Candidate-Coding-Assignments
+# AG NEWS classification
 
