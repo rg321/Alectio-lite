@@ -51,6 +51,8 @@ class ProgressPercentage(object):
                     percentage,
                 )
             )
+
+
             sys.stdout.flush()
 
 
@@ -154,6 +156,7 @@ class S3Client:
             Callback=ProgressPercentage(fileobj, object_key),
             Config=config,
         )
+        print('\n')
 
         return
 
