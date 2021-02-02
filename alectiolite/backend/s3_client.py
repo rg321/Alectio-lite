@@ -16,10 +16,7 @@ from hurry.filesize import size
 import requests
 
 
-
-__all__ = ['S3Client'
-           ]
-
+__all__ = ["S3Client"]
 
 
 class ProgressPercentage(object):
@@ -52,7 +49,6 @@ class ProgressPercentage(object):
                 )
             )
 
-
             sys.stdout.flush()
 
 
@@ -60,18 +56,20 @@ class S3Client:
     """Boto3 client to S3"""
 
     def __init__(self):
-        presigned_cred = requests.post("http://api.alectio.com/experiments/getcredentials").json()
+        presigned_cred = requests.post(
+            "http://api.alectio.com/experiments/getcredentials"
+        ).json()
         # boto3 clients to read / write to S3 bucket
         self.client = boto3.client(
             "s3",
-            aws_access_key_id=presigned_cred['KEY'],
+            aws_access_key_id=presigned_cred["KEY"],
             aws_secret_access_key=presigned_cred["SECRET"],
         )
-        os.environ["AWS_ACCESS_KEY_ID"] = presigned_cred['KEY']
-        os.environ["AWS_SECRET_ACCESS_KEY"] = presigned_cred['SECRET']
+        os.environ["AWS_ACCESS_KEY_ID"] = presigned_cred["KEY"]
+        os.environ["AWS_SECRET_ACCESS_KEY"] = presigned_cred["SECRET"]
 
     def read(self, bucket_name, object_key, file_format):
-        """ Read a file from the S3 bucket containing
+        """Read a file from the S3 bucket containing
         this experiment
 
         object_key: str.
@@ -123,7 +121,11 @@ class S3Client:
         # @TODO add md5 hash
         # @TODO return success or failure message
         # put in S3
-        r = self.client.put_object(Bucket=bucket_name, Key=object_key, Body=bytestr, )
+        r = self.client.put_object(
+            Bucket=bucket_name,
+            Key=object_key,
+            Body=bytestr,
+        )
 
         return
 
@@ -156,7 +158,7 @@ class S3Client:
             Callback=ProgressPercentage(fileobj, object_key),
             Config=config,
         )
-        print('\n')
+        print("\n")
 
         return
 
@@ -192,7 +194,7 @@ class S3Client:
             object_name = file_name
 
         # Upload the file
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client("s3")
         try:
             response = s3_client.upload_file(file_name, bucket, object_name)
         except ClientError as e:
@@ -200,7 +202,9 @@ class S3Client:
             return False
         return True
 
-    def download_checkpoints(self, bucket_name, project_id, experiment_id, cur_loop, log_dir):
+    def download_checkpoints(
+        self, bucket_name, project_id, experiment_id, cur_loop, log_dir
+    ):
         checkpoints_to_download = list(range(cur_loop))
 
         for checkpoint in checkpoints_to_download:
@@ -212,13 +216,15 @@ class S3Client:
             )
 
     def upload_feather_s3(self, df, bucket_name, object_key):
-        s3_resource = boto3.resource('s3')
+        s3_resource = boto3.resource("s3")
         with BytesIO() as f:
             output_stream = BytesIO()
             df.to_feather(output_stream)
-            s3_resource.Object(bucket_name, object_key).put(Body=output_stream.getvalue())
+            s3_resource.Object(bucket_name, object_key).put(
+                Body=output_stream.getvalue()
+            )
 
     def read_feather_file_from_s3(self, bucket_name, object_key):
-        s3 = boto3.client('s3')
+        s3 = boto3.client("s3")
         retr = s3.get_object(Bucket=bucket_name, Key=object_key)
-        return pd.read_feather(io.BytesIO(retr['Body'].read()))
+        return pd.read_feather(io.BytesIO(retr["Body"].read()))

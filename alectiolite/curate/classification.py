@@ -21,8 +21,9 @@ class operations(DefaultCallback):
 
 """
 
-__all__ = ['UniClassification']
-console = Console(style ="green")
+__all__ = ["UniClassification"]
+console = Console(style="green")
+
 
 class UniClassification(init_classification):
     """
@@ -34,18 +35,21 @@ class UniClassification(init_classification):
         Unique token string given for each Active learning experiment
     infer_outputs : dict
         Logit outputs of your model
-        
+
     Methods
     -------
     _printexperimentinfo(payload):
         Prints the payload information of each triggered experiment
-    
+
     _triggertask():
-        Triggers an experiment 
+        Triggers an experiment
     """
-    def __init__(self, config , subset = None , callbacks = None , verbose =True, activation = None):
-        logging.info('Triggering Alectio jobs to perform curation experiments ')
-        logging.info('Sweeping configs')
+
+    def __init__(
+        self, config, subset=None, callbacks=None, verbose=True, activation=None
+    ):
+        logging.info("Triggering Alectio jobs to perform curation experiments ")
+        logging.info("Sweeping configs")
         super().__init__(config)
         self.payload = config
         if callbacks is None:
@@ -58,59 +62,64 @@ class UniClassification(init_classification):
         self.client = S3Client()
 
         self.fit()
-   
-        
+
     def _printexperimentinfo(self, payload):
-        #console = Console()
+        # console = Console()
 
         table = Table(show_header=True, header_style="bold magenta")
-        console.print('\n')
-        console.print('Details of your experiment ... ')
+        console.print("\n")
+        console.print("Details of your experiment ... ")
         row_values = []
-        
-        for k , v in payload.items():
-            table.add_column(str(k), justify ="center")
+
+        for k, v in payload.items():
+            table.add_column(str(k), justify="center")
             row_values.append(str(v))
 
-        table.add_row(row_values[0],row_values[1],row_values[2],row_values[3],row_values[4],row_values[5],row_values[6],row_values[7],row_values[8])
+        table.add_row(
+            row_values[0],
+            row_values[1],
+            row_values[2],
+            row_values[3],
+            row_values[4],
+            row_values[5],
+            row_values[6],
+            row_values[7],
+            row_values[8],
+        )
         console.print(table)
 
-
     def fit(self):
-        logging.info('Your experiment status :', self.experiment_config.STATUS)
-        logging.info('Triggering task ....')
-             
+        logging.info("Your experiment status :", self.experiment_config.STATUS)
+        logging.info("Triggering task ....")
+
         if self.verbose:
             self._printexperimentinfo(self.payload)
 
         ##### Call necessary deterministic callbacks
         for cb in self.callbacks:
-            cb.on_project_start(monitor= "meta",
-                                data = None,
-                                config = self.config)
-            cb.on_train_start(monitor= "selected_indices",
-                              data = None,
-                              config = self.config)
+            cb.on_project_start(monitor="meta", data=None, config=self.config)
+            cb.on_train_start(monitor="selected_indices", data=None, config=self.config)
 
-        if self.experiment_config.CUR_LOOP =='':
-            self.selected_file = os.path.join(self.experiment_dir, 'selected_indices.pkl')
+        if self.experiment_config.CUR_LOOP == "":
+            self.selected_file = os.path.join(
+                self.experiment_dir, "selected_indices.pkl"
+            )
         elif self.experiment_config.CUR_LOOP >= 0:
-            self.selected_file = os.path.join(self.experiment_dir, 'selected_indices_{}.pkl'.format(self.experiment_config.CUR_LOOP))
+            self.selected_file = os.path.join(
+                self.experiment_dir,
+                "selected_indices_{}.pkl".format(self.experiment_config.CUR_LOOP),
+            )
         else:
-            raise ValueError("Invalid experiment loop value chosen to monitor / you must pass previous loops output to Alectio for this operatio")
+            raise ValueError(
+                "Invalid experiment loop value chosen to monitor / you must pass previous loops output to Alectio for this operatio"
+            )
 
+        # selected = self._read_pickle(selected_file)
 
+        # return selected
 
-
-
-        #selected = self._read_pickle(selected_file)
-
-        #return selected
-
-        
-        #self.on_infer_start()
-        #self.on_infer_end()
-        
+        # self.on_infer_start()
+        # self.on_infer_end()
 
     def on_infer_start(self):
         pass
@@ -125,16 +134,3 @@ class UniClassification(init_classification):
                 self.data_map, self.experiment_config.BUCKET_NAME, object_key, "pickle"
             )
         """
-
-
-
-
-
-
-
-
-
-
-
-    
-    

@@ -4,8 +4,8 @@ import torch.nn.functional as F
 
 import torch.utils.data.sampler as samplers
 
-class SubsetSampler(samplers.Sampler):
 
+class SubsetSampler(samplers.Sampler):
     def __init__(self, indices):
         self.indices = indices
 
@@ -16,15 +16,13 @@ class SubsetSampler(samplers.Sampler):
         return len(self.indices)
 
 
-
-
 class TextSentiment(nn.Module):
     def __init__(self, vocab_size, embed_dim, num_class):
         super().__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=True)
         self.fc = nn.Linear(embed_dim, num_class)
         self.initialize_weights()
-    
+
     def initialize_weights(self):
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)

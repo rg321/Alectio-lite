@@ -20,15 +20,14 @@ n_loop :10.0
 """
 
 
+__all__ = ["init_classification"]
+console = Console(style="green")
 
-__all__ = ['init_classification']
-console = Console(style ="green")
 
 class init_classification:
     def __init__(self, config):
-        self.payload = config        
+        self.payload = config
         self._experiment_controller()
-
 
     @property
     def config(self):
@@ -42,45 +41,50 @@ class init_classification:
     def _update_experiment_config(self):
         cfglist = []
         for k, v in self.payload.items():
-            cfglist.extend([str(k).upper(),v])
+            cfglist.extend([str(k).upper(), v])
         update_backend_config(backend_config, cfglist)
-        self.experiment_config = backend_config    #### Gets updated for each experiment whenever a call is made to the API
+        self.experiment_config = backend_config  #### Gets updated for each experiment whenever a call is made to the API
 
-    def _checkdirs(self,dir_ , kind =''):
+    def _checkdirs(self, dir_, kind=""):
         if not os.path.exists(dir_):
-            os.makedirs(dir_,exist_ok =True)
-            console.print("All Alectio {} logs will be saved to {}".format(kind,self.experiment_config.EXPERIMENT_ID))
+            os.makedirs(dir_, exist_ok=True)
+            console.print(
+                "All Alectio {} logs will be saved to {}".format(
+                    kind, self.experiment_config.EXPERIMENT_ID
+                )
+            )
 
     def _experiment_controller(self):
         if bool(self.payload):
-            self._update_experiment_config()            
+            self._update_experiment_config()
         else:
-            raise ValueError("No valid experiment details found for current experiment token, please check your token or try again")
-        if 'classification' not in self.experiment_config.TYPE.lower():
-            raise ValueError("The token seems to be incorrect for the experiment type you are trying to run")
+            raise ValueError(
+                "No valid experiment details found for current experiment token, please check your token or try again"
+            )
+        if "classification" not in self.experiment_config.TYPE.lower():
+            raise ValueError(
+                "The token seems to be incorrect for the experiment type you are trying to run"
+            )
 
         self.experiment_log_dir = self.experiment_config.EXPERIMENT_ID
 
-        #TO DO : A better solution for buckets , API in works
+        # TO DO : A better solution for buckets , API in works
         if self.experiment_config.BUCKET_NAME == self.experiment_config.SANDBOX_BUCKET:
-            self.experiment_dir = os.path.join(self.experiment_config.USER_ID,
-                                               self.experiment_config.PROJECT_ID ,
-                                               self.experiment_config.EXPERIMENT_ID
-                                               )
-            self._checkdirs(self.experiment_dir,'experiment')
-            self.project_dir = os.path.join(self.experiment_config.USER_ID,
-                                            self.experiment_config.PROJECT_ID)
-            self._checkdirs(self.project_dir, 'project')
+            self.experiment_dir = os.path.join(
+                self.experiment_config.USER_ID,
+                self.experiment_config.PROJECT_ID,
+                self.experiment_config.EXPERIMENT_ID,
+            )
+            self._checkdirs(self.experiment_dir, "experiment")
+            self.project_dir = os.path.join(
+                self.experiment_config.USER_ID, self.experiment_config.PROJECT_ID
+            )
+            self._checkdirs(self.project_dir, "project")
 
         else:
-            self.experiment_dir = os.path.join(self.experiment_config.PROJECT_ID ,
-                                               self.experiment_config.EXPERIMENT_ID
-                                               )
-            self._checkdirs(self.experiment_dir,'experiment')
+            self.experiment_dir = os.path.join(
+                self.experiment_config.PROJECT_ID, self.experiment_config.EXPERIMENT_ID
+            )
+            self._checkdirs(self.experiment_dir, "experiment")
             self.project_dir = os.path.join(self.experiment_config.PROJECT_ID)
-            self._checkdirs(self.project_dir,'project')
-
-
-
-
-        
+            self._checkdirs(self.project_dir, "project")

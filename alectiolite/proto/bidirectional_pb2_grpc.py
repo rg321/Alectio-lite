@@ -15,20 +15,20 @@ class BidirectionalStub(object):
             channel: A grpc.Channel.
         """
         self.GetServerResponse = channel.stream_stream(
-                '/bidirectional.Bidirectional/GetServerResponse',
-                request_serializer=bidirectional__pb2.Message.SerializeToString,
-                response_deserializer=bidirectional__pb2.Message.FromString,
-                )
+            "/bidirectional.Bidirectional/GetServerResponse",
+            request_serializer=bidirectional__pb2.Message.SerializeToString,
+            response_deserializer=bidirectional__pb2.Message.FromString,
+        )
         self.GetStartExperimentResponse = channel.stream_stream(
-                '/bidirectional.Bidirectional/GetStartExperimentResponse',
-                request_serializer=bidirectional__pb2.StartExperiment.SerializeToString,
-                response_deserializer=bidirectional__pb2.StartExperiment.FromString,
-                )
+            "/bidirectional.Bidirectional/GetStartExperimentResponse",
+            request_serializer=bidirectional__pb2.StartExperiment.SerializeToString,
+            response_deserializer=bidirectional__pb2.StartExperiment.FromString,
+        )
         self.GetSDKResponse = channel.stream_stream(
-                '/bidirectional.Bidirectional/GetSDKResponse',
-                request_serializer=bidirectional__pb2.GetExperimentResponse.SerializeToString,
-                response_deserializer=bidirectional__pb2.EXPAlectioResponse.FromString,
-                )
+            "/bidirectional.Bidirectional/GetSDKResponse",
+            request_serializer=bidirectional__pb2.GetExperimentResponse.SerializeToString,
+            response_deserializer=bidirectional__pb2.EXPAlectioResponse.FromString,
+        )
 
 
 class BidirectionalServicer(object):
@@ -41,96 +41,133 @@ class BidirectionalServicer(object):
         while receiving other Message (e.g. from other users).
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetStartExperimentResponse(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetSDKResponse(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_BidirectionalServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetServerResponse': grpc.stream_stream_rpc_method_handler(
-                    servicer.GetServerResponse,
-                    request_deserializer=bidirectional__pb2.Message.FromString,
-                    response_serializer=bidirectional__pb2.Message.SerializeToString,
-            ),
-            'GetStartExperimentResponse': grpc.stream_stream_rpc_method_handler(
-                    servicer.GetStartExperimentResponse,
-                    request_deserializer=bidirectional__pb2.StartExperiment.FromString,
-                    response_serializer=bidirectional__pb2.StartExperiment.SerializeToString,
-            ),
-            'GetSDKResponse': grpc.stream_stream_rpc_method_handler(
-                    servicer.GetSDKResponse,
-                    request_deserializer=bidirectional__pb2.GetExperimentResponse.FromString,
-                    response_serializer=bidirectional__pb2.EXPAlectioResponse.SerializeToString,
-            ),
+        "GetServerResponse": grpc.stream_stream_rpc_method_handler(
+            servicer.GetServerResponse,
+            request_deserializer=bidirectional__pb2.Message.FromString,
+            response_serializer=bidirectional__pb2.Message.SerializeToString,
+        ),
+        "GetStartExperimentResponse": grpc.stream_stream_rpc_method_handler(
+            servicer.GetStartExperimentResponse,
+            request_deserializer=bidirectional__pb2.StartExperiment.FromString,
+            response_serializer=bidirectional__pb2.StartExperiment.SerializeToString,
+        ),
+        "GetSDKResponse": grpc.stream_stream_rpc_method_handler(
+            servicer.GetSDKResponse,
+            request_deserializer=bidirectional__pb2.GetExperimentResponse.FromString,
+            response_serializer=bidirectional__pb2.EXPAlectioResponse.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'bidirectional.Bidirectional', rpc_method_handlers)
+        "bidirectional.Bidirectional", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class Bidirectional(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetServerResponse(request_iterator,
+    def GetServerResponse(
+        request_iterator,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.stream_stream(
+            request_iterator,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/bidirectional.Bidirectional/GetServerResponse',
+            "/bidirectional.Bidirectional/GetServerResponse",
             bidirectional__pb2.Message.SerializeToString,
             bidirectional__pb2.Message.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetStartExperimentResponse(request_iterator,
+    def GetStartExperimentResponse(
+        request_iterator,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.stream_stream(
+            request_iterator,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/bidirectional.Bidirectional/GetStartExperimentResponse',
+            "/bidirectional.Bidirectional/GetStartExperimentResponse",
             bidirectional__pb2.StartExperiment.SerializeToString,
             bidirectional__pb2.StartExperiment.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetSDKResponse(request_iterator,
+    def GetSDKResponse(
+        request_iterator,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.stream_stream(
+            request_iterator,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/bidirectional.Bidirectional/GetSDKResponse',
+            "/bidirectional.Bidirectional/GetSDKResponse",
             bidirectional__pb2.GetExperimentResponse.SerializeToString,
             bidirectional__pb2.EXPAlectioResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )

@@ -3,59 +3,41 @@ import alectiolite
 from alectiolite.callbacks import CurateCallback
 
 
-
 # Steps
 
 
-# Get token from FE 
-token = 'e33aa51443b743d49d71c8dc9de25932'
+# Get token from FE
+token = "e33aa51443b743d49d71c8dc9de25932"
 
-data = pickle.load(open('data_map.pkl','rb'))
-inputrecords = {'1': 1111 ,'2': 11111 , '3' : 838383883}
-
-
+data = pickle.load(open("data_map.pkl", "rb"))
+inputrecords = {"1": 1111, "2": 11111, "3": 838383883}
 
 
 # Step 1 Get experiment config
-config = alectiolite.experiment_config(token = token)
+config = alectiolite.experiment_config(token=token)
 # Step 2 Initialize your callback
-cb= CurateCallback()
+cb = CurateCallback()
 # Step 3 Tap what type of experiment you want to run
-alectiolite.curate_classification(config = config , callbacks = [cb])
+alectiolite.curate_classification(config=config, callbacks=[cb])
 
 # Step 4 Tap overrideables
-cb.on_project_start(monitor= 'datasetstate',data = data, config = config)
+cb.on_project_start(monitor="datasetstate", data=data, config=config)
 
 
-
-#Initialize classification
-#cb= Alectioreturn()
-
+# Initialize classification
+# cb= Alectioreturn()
 
 
-#alectiolite.curate_classification(token = token , subset = 0, callbacks = [cb])
+# alectiolite.curate_classification(token = token , subset = 0, callbacks = [cb])
 
 
+# print("Lets print my config")
+
+# Getconfig
+# alectiolite.curate_classification.config
 
 
-#print("Lets print my config")
-
-#Getconfig
-#alectiolite.curate_classification.config
-
-
-
-
-
-
-
-
-
-
-
-#print(exp_info)
-
-
+# print(exp_info)
 
 
 """

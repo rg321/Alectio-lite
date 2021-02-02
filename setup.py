@@ -9,7 +9,7 @@ def parse_requirements(filename):
 
 install_reqs = parse_requirements("./requirements.txt")
 
-with open("README.md", "r" , encoding ="utf-8") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -23,10 +23,10 @@ setuptools.setup(
     url="https://github.com/alectio/flexible-SDK",
     packages=setuptools.find_packages(exclude=["tests"]),
     classifiers=[
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6.10',
-        'Programming Language :: Python :: 3.7',
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6.10",
+        "Programming Language :: Python :: 3.7",
     ],
     install_requires=install_reqs,
-    python_requires='>=3.6',
-    )
+    python_requires=">=3.6",
+)
