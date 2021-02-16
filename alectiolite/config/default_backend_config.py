@@ -28,6 +28,10 @@ _C.N_LOOP = 0.0
 _C.OUTFILES = ("metrics", "test_predictions", "datasetstate", "pre_softmax")
 _C.INFILES = ("meta", "labeled_pool", "selected_indices")
 
+# Log directories
+_C.EXPERIMENT_DIR = ""
+_C.PROJECT_DIR = ""
+
 
 def update_backend_config(cfg, include_cfg):
     cfg.defrost()

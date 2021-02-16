@@ -41,6 +41,33 @@ def _check_monitor(monitor):
 
     raise ValueError("Invalid monitor value {} ".format(monitor))
 
+def _create_log_dirs():
+    directory_list = []
+    ##setup logdirs
+    # TO DO : A better solution for buckets , API in works
+    if backend_config.BUCKET_NAME == backend_config.SANDBOX_BUCKET:
+        experiment_dir = os.path.join(
+            backend_config.USER_ID,
+            backend_config.PROJECT_ID,
+            backend_config.EXPERIMENT_ID,
+        )
+        directory_list.extend(["experiment_dir".upper(),experiment_dir])
+        project_dir = os.path.join(backend_config.USER_ID, backend_config.PROJECT_ID)
+        directory_list.extend(["project_dir".upper(),project_dir])
+        
+    else:
+        experiment_dir = os.path.join(
+            backend_config.PROJECT_ID, backend_config.EXPERIMENT_ID
+        )
+        directory_list.extend(["experiment_dir".upper(),experiment_dir])
+        project_dir = os.path.join(backend_config.PROJECT_ID)
+        directory_list.extend(["project_dir".upper(),project_dir])
+
+    update_backend_config(backend_config, directory_list)
+    _checkdirs(experiment_dir, "experiment")
+
+
+
 
 def experiment_logger(monitor, data, config):
     """
@@ -50,53 +77,38 @@ def experiment_logger(monitor, data, config):
     """
     _reel_in_configs(config)
     _check_monitor(monitor)
-    ##setup logdirs
-    # TO DO : A better solution for buckets , API in works
-    if backend_config.BUCKET_NAME == backend_config.SANDBOX_BUCKET:
-        experiment_dir = os.path.join(
-            backend_config.USER_ID,
-            backend_config.PROJECT_ID,
-            backend_config.EXPERIMENT_ID,
-        )
-        project_dir = os.path.join(backend_config.USER_ID, backend_config.PROJECT_ID)
-        _checkdirs(experiment_dir, "experiment")
-    else:
-        experiment_dir = os.path.join(
-            backend_config.PROJECT_ID, backend_config.EXPERIMENT_ID
-        )
-        project_dir = os.path.join(backend_config.PROJECT_ID)
-        _checkdirs(experiment_dir, "experiment")
-
+    _create_log_dirs()
+    
     if monitor == "datasetstate" and backend_config.CUR_LOOP == "":
-        filename = os.path.join(experiment_dir, "data_map.pkl")
+        filename = os.path.join(backend_config.EXPERIMENT_DIR, "data_map.pkl")
         _log_pickle(monitor, filename, data)
     elif monitor == "datasetstate" and backend_config.CUR_LOOP >= 0:
         filename = os.path.join(
-            experiment_dir, "data_map_{}.pkl".format(backend_config.CUR_LOOP)
+            backend_config.EXPERIMENT_DIR, "data_map_{}.pkl".format(backend_config.CUR_LOOP)
         )
         _log_pickle(monitor, filename, data)
 
     elif (
         monitor == "meta"
     ):  # TODO when streaming is available people may add classes on the fly
-        filename = os.path.join(project_dir, "meta.json")
+        filename = os.path.join(backend_config.PROJECT_DIR, "meta.json")
         _log_json(monitor, filename, data)
     elif monitor == "selected_indices" and backend_config.CUR_LOOP == "":
-        filename = os.path.join(experiment_dir, "selected_indices.pkl")
+        filename = os.path.join(backend_config.EXPERIMENT_DIR, "selected_indices.pkl")
         _log_pickle(monitor, filename, data, mode="read")
     elif monitor == "selected_indices" and backend_config.CUR_LOOP >= 0:
         filename = os.path.join(
-            experiment_dir, "selected_indices_{}.pkl".format(backend_config.CUR_LOOP)
+            backend_config.EXPERIMENT_DIR, "selected_indices_{}.pkl".format(backend_config.CUR_LOOP)
         )
         _log_pickle(monitor, filename, data, mode="read")
     elif monitor == "pre_softmax" and backend_config.CUR_LOOP == "":
-        filename = os.path.join(experiment_dir, "pre_softmax.pkl")
+        filename = os.path.join(backend_config.EXPERIMENT_DIR, "pre_softmax.pkl")
         _remap_outs(data)
         _log_pickle(monitor, filename, data)
         _sweep_experiment(monitor, filename)
     elif monitor == "pre_softmax" and backend_config.CUR_LOOP >= 0:
         filename = os.path.join(
-            experiment_dir, "pre_softmax_{}.pkl".format(backend_config.CUR_LOOP)
+            backend_config.EXPERIMENT_DIR, "pre_softmax_{}.pkl".format(backend_config.CUR_LOOP)
         )
         remapped_data = _remap_outs(data)
         _log_pickle(monitor, filename, remapped_data)
@@ -146,18 +158,14 @@ def load_pickle(filename):
 
 
 def _remap_outs(data):
-    experiment_dir = os.path.join(
-        backend_config.PROJECT_ID, backend_config.EXPERIMENT_ID
-    )
-    project_dir = os.path.join(backend_config.PROJECT_ID)
     experiment_meta = json.load(
-        open(os.path.join(project_dir, "meta.json"), "rb")
+        open(os.path.join(backend_config.PROJECT_DIR, "meta.json"), "rb")
     )  # loopwise meta in future
     train_size = list(range(experiment_meta["train_size"]))
 
     selected_file = load_pickle(
         os.path.join(
-            experiment_dir, "selected_indices_{}.pkl".format(backend_config.CUR_LOOP)
+            backend_config.EXPERIMENT_DIR, "selected_indices_{}.pkl".format(backend_config.CUR_LOOP)
         )
     )
     # print("selected_file" , selected_file)
@@ -176,25 +184,20 @@ def _sweep_experiment(monitor, filename):
     if not os.path.isfile(filename):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), filename)
 
-    experiment_dir = os.path.join(
-        backend_config.PROJECT_ID, backend_config.EXPERIMENT_ID
-    )
-    project_dir = os.path.join(backend_config.PROJECT_ID)
-
-    for f in os.listdir(project_dir):
+    for f in os.listdir(backend_config.PROJECT_DIR):
         if "meta" not in f:
-            if not os.path.isdir(os.path.join(project_dir, f)):
+            if not os.path.isdir(os.path.join(backend_config.PROJECT_DIR, f)):
                 client.multi_part_upload_file(
-                    os.path.join(project_dir, f),
+                    os.path.join(backend_config.PROJECT_DIR, f),
                     backend_config.BUCKET_NAME,
-                    os.path.join(project_dir, f),
+                    os.path.join(backend_config.PROJECT_DIR, f),
                 )
 
-    for f in os.listdir(experiment_dir):
+    for f in os.listdir(backend_config.EXPERIMENT_DIR):
         if "meta" not in f:
-            if not os.path.isdir(os.path.join(experiment_dir, f)):
+            if not os.path.isdir(os.path.join(backend_config.EXPERIMENT_DIR, f)):
                 client.multi_part_upload_file(
-                    os.path.join(experiment_dir, f),
+                    os.path.join(backend_config.EXPERIMENT_DIR, f),
                     backend_config.BUCKET_NAME,
-                    os.path.join(experiment_dir, f),
+                    os.path.join(backend_config.EXPERIMENT_DIR, f),
                 )
