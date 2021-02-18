@@ -12,7 +12,7 @@ from tqdm import tqdm
 import torch.optim as optim
 
 
-TOKEN = "e4f588d9d6404a34a4f66c7f5cf87aac"
+TOKEN = "08c2ca4b7f47433d91dae37a51662d81"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -110,6 +110,7 @@ if __name__ == "__main__":
 
     # Step 1 Get experiment config
     config = alectiolite.experiment_config(token=TOKEN)
+    print(config)
     # Step 2 Initialize your callback
     cb = CurateCallback()
     # Step 3 Tap what type of experiment you want to run
@@ -133,3 +134,5 @@ if __name__ == "__main__":
 
     # On ready to pass unlabeled
     cb.on_infer_end(monitor="pre_softmax", data=infer_outs, config=config)
+
+    cb.on_experiment_end(token= TOKEN)
