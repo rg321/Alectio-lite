@@ -17,5 +17,5 @@ class AlectioCallback(abc.ABC):
     def on_infer_end(self):
         pass
 
-    def on_experiment_start():
+    def on_experiment_end(self):
         pass

@@ -10,6 +10,7 @@ from pyarrow import feather
 import pandas as pd
 from tqdm import tqdm
 from boto3.s3.transfer import TransferConfig
+from botocore.exceptions import ClientError
 from io import BytesIO
 from threading import Thread, Lock
 from hurry.filesize import size
@@ -228,3 +229,17 @@ class S3Client:
         s3 = boto3.client("s3")
         retr = s3.get_object(Bucket=bucket_name, Key=object_key)
         return pd.read_feather(io.BytesIO(retr["Body"].read()))
+
+
+    def check_file_exists(self, bucket_name, object_key):      
+
+        try:
+            self.client.head_object(Bucket= bucket_name, Key= object_key)
+        except ClientError as e:
+            if (int(e.response['Error']['Code']) != 404):
+                return "Failed"
+            else:
+                return "Running"
+        
+        return "Complete"
+

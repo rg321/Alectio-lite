@@ -19,3 +19,7 @@ class CurateCallback(AlectioCallback):
     def on_infer_end(self, monitor, data, config):
 
         alectiolite.experiment_logger(monitor=monitor, data=data, config=config)
+
+
+    def on_experiment_end(self, token):
+        alectiolite.complete_loop(token= token)

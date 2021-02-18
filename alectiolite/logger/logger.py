@@ -1,8 +1,11 @@
 import os
 import json
+import time
 import errno
 import boto3
 import pickle
+import duckdb
+import requests
 import pickletools
 from rich.table import Table
 from rich.console import Console
@@ -68,8 +71,72 @@ def _create_log_dirs():
 
 
 
+def experiment_logger(monitor, data, config , format = 'pickle'):
+    if format =='pickle':
+        experiment_pickle_logger(monitor, data, config)
+    elif format == 'parquet':
+        experiment_db_logger(monitor, data, config)
 
-def experiment_logger(monitor, data, config):
+
+
+
+def experiment_pickle_logger(monitor, data, config):
+    """
+    Used by users to log experiment level logs
+    #TODO replace/adapt with framework based callbacks
+
+    """
+    _reel_in_configs(config)
+    _check_monitor(monitor)
+    _create_log_dirs()
+    
+    if monitor == "datasetstate" and backend_config.CUR_LOOP == "":
+        filename = os.path.join(backend_config.EXPERIMENT_DIR, "data_map.pkl")
+        _log_pickle(monitor, filename, data)
+    elif monitor == "datasetstate" and backend_config.CUR_LOOP >= 0:
+        filename = os.path.join(
+            backend_config.EXPERIMENT_DIR, "data_map_{}.pkl".format(backend_config.CUR_LOOP)
+        )
+        _log_pickle(monitor, filename, data)
+
+    elif (
+        monitor == "meta"
+    ):  # TODO when streaming is available people may add classes on the fly
+        filename = os.path.join(backend_config.PROJECT_DIR, "meta.json")
+        _log_json(monitor, filename, data)
+    elif monitor == "selected_indices" and backend_config.CUR_LOOP == "":
+        filename = os.path.join(backend_config.EXPERIMENT_DIR, "selected_indices.pkl")
+        _log_pickle(monitor, filename, data, mode="read")
+    elif monitor == "selected_indices" and backend_config.CUR_LOOP >= 0:
+        filename = os.path.join(
+            backend_config.EXPERIMENT_DIR, "selected_indices_{}.pkl".format(backend_config.CUR_LOOP)
+        )
+        _log_pickle(monitor, filename, data, mode="read")
+    elif monitor == "logits" and backend_config.CUR_LOOP == "":
+        filename = os.path.join(backend_config.EXPERIMENT_DIR, "logits.pkl")
+        _remap_outs(data)
+        _log_pickle(monitor, filename, data)
+        _sweep_experiment(monitor, filename)
+    elif monitor == "logits" and backend_config.CUR_LOOP >= 0:
+        filename = os.path.join(
+            backend_config.EXPERIMENT_DIR, "logits_{}.pkl".format(backend_config.CUR_LOOP)
+        )
+        remapped_data = _remap_outs(data)
+        log_data = {}
+        for k ,v in remapped_data.items():
+            log_data[k] = {monitor:v}
+        _log_pickle(monitor, filename, log_data)
+        _sweep_experiment(monitor, filename)
+
+    else:
+        raise ValueError(
+            "Invalid experiment loop and/or monitor value chosen to monitor"
+        )
+
+
+
+
+def experiment_db_logger(monitor, data, config):
     """
     Used by users to log experiment level logs
     #TODO replace/adapt with framework based callbacks
@@ -118,6 +185,8 @@ def experiment_logger(monitor, data, config):
         raise ValueError(
             "Invalid experiment loop and/or monitor value chosen to monitor"
         )
+
+
 
 
 def _log_json(monitor, filename, data):
@@ -201,3 +270,54 @@ def _sweep_experiment(monitor, filename):
                     backend_config.BUCKET_NAME,
                     os.path.join(backend_config.EXPERIMENT_DIR, f),
                 )
+
+
+
+def complete_loop(token):
+    url = "".join(["http://", backend_config.BACKEND_IP, ":{}".format(backend_config.PORT), "/end_of_task"])
+    headers = {"Authorization": "Bearer " + token}
+    #console.print("Backend IP =", backend_config.BACKEND_IP)
+    # Step to be skipped after Dev backend change
+    returned_payload = {"exp_token": "TOKEN"}
+    """
+    returned_payload = {'status': backend_config.STATUS, 
+                        'experiment_id':backend_config.EXPERIMENT_ID, 
+                        'project_id':backend_config.PROJECT_ID, 
+                        'cur_loop':backend_config.CUR_LOOP,  
+                        'user_id':backend_config.USER_ID, 
+                        'bucket_name':backend_config.BUCKET_NAME,  
+                        'type':backend_config.TYPE, 
+                        'n_rec':backend_config.N_REC,  
+                        'n_loop': backend_config.N_LOOP}
+    """
+
+    status = requests.post(url=url, json=returned_payload, headers=headers).status_code
+
+    if status == 200:
+        console.print("Experiment {} has been triggered .. Requesting Alectio servers to return curation results ... ".format(backend_config.EXPERIMENT_ID))
+        #Need better solution
+        check_file = "selected_indices_{}.pkl".format(int(backend_config.CUR_LOOP)+1)
+        object_key = os.path.join(backend_config.EXPERIMENT_DIR , check_file)
+        waittime = 40  # wait time approximately 10 minutes
+        ping_server = ["Request {}".format(n) for n in range(waittime)]
+
+        while True:
+            #Looks for selected indices in the bucket
+            ping = ping_server.pop(0)
+            experiment_status = client.check_file_exists(backend_config.BUCKET_NAME, object_key=object_key)
+            if experiment_status == "Failed":
+                console.print("Unable to fetch current indices ! your experiment failed due to difficulties in connecting to the cloud servers!")
+                return
+            elif experiment_status == "Complete":
+                console.print("Experiment complete ! Time to pull your curated list of records that you should label before training again ")
+                return
+
+            if not ping_server:
+                console.print("Sorry our servers are currently busy, please check back again later for your curated list !")
+                break
+            console.print("{} Complete, this may take some time ....".format(ping))
+            time.sleep(25)
+            
+    else:
+        console.print("Request timed out , unable to fetch current indices ! Alectio servers seem to be offline")
+

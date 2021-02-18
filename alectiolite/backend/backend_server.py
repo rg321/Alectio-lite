@@ -23,7 +23,8 @@ __all__ = [
 ]
 
 
-GRPCBACKEND = "50.112.116.244:50051"
+#GRPCBACKEND = "50.112.116.244:50051"
+GRPCBACKEND = "54.218.75.58:50051"
 console = Console(style="bold yellow")
 
 
@@ -42,14 +43,14 @@ class BackendServer(object):
         # project_id = request.get_json()['project_id']
         # user_id = request.get_json()['user_id']
         # experiment_id = request.get_json()['experiment_id']
-        with grpc.insecure_channel("50.112.116.244:50051") as channel:
+        with grpc.insecure_channel("54.218.75.58:50051") as channel:
             stub = bidirectional_pb2_grpc.BidirectionalStub(channel)
             responses = stub.GetStartExperimentResponse(self.make_start_exp_payload())
             for response in responses:
                 return response.exp_token
 
     def getSDKResponse(self):
-        with grpc.insecure_channel("50.112.116.244:50051") as channel:
+        with grpc.insecure_channel("54.218.75.58:50051") as channel:
             stub = bidirectional_pb2_grpc.BidirectionalStub(channel)
             responses = stub.GetSDKResponse(self.make_sdk_response_payload())
             response_obj = next(responses)
@@ -119,3 +120,5 @@ class BackendServer(object):
                     console.print("{} failed. Retrying ...".format(ping))
                 if not ping_server:
                     console.print("Sorry out servers are offline, try again later !")
+                    break
+

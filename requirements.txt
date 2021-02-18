@@ -28,4 +28,5 @@ envyaml
 pyarrow==0.16.0
 rich
 yacs
-
+pandas
+duckdb
