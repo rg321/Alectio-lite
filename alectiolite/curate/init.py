@@ -20,11 +20,11 @@ n_loop :10.0
 """
 
 
-__all__ = ["init_classification"]
+__all__ = ["init_curation"]
 console = Console(style="green")
 
 
-class init_classification:
+class init_curation:
     def __init__(self, config):
         self.payload = config
         self._experiment_controller()
@@ -61,9 +61,9 @@ class init_classification:
             raise ValueError(
                 "No valid experiment details found for current experiment token, please check your token or try again"
             )
-        if "classification" not in self.experiment_config.TYPE.lower():
+        if self.experiment_config.TYPE.lower() not in ["classification", "2d_object_detection","text_classification"] :
             raise ValueError(
-                "The token seems to be incorrect for the experiment type you are trying to run"
+                "The token seems to be incorrect for the experiment type {} you are trying to run".format(self.experiment_config.TYPE.lower())
             )
 
         self.experiment_log_dir = self.experiment_config.EXPERIMENT_ID

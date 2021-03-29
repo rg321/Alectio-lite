@@ -21,11 +21,11 @@ class operations(DefaultCallback):
 
 """
 
-__all__ = ["UniClassification"]
+__all__ = ["ObjectSegmentation"]
 console = Console(style="green")
 
 
-class UniClassification(init_curation):
+class ObjectSegmentation(init_curation):
     """
     A class that consumes and preprocesse's model's logits
     ...

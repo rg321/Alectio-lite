@@ -92,43 +92,9 @@ class S3Client:
             content = pickle.loads(f)
         elif file_format == "txt":
             content = body.read().decode(encoding="utf-8", errors="ignore")
+        elif file_format == "parquet":
+            content = BytesIO(body.read())
         return content
-
-    def write(self, obj, bucket_name, object_key, file_format):
-        """Write an object to S3 bucket
-        Mostly used for writing ExperimentData.pkl
-        InferenceData.pkl files
-
-        obj: dict | list | string
-
-        bucket_name: name of the s3 bucket
-        object_key: str.
-            object key in the S3 bucket
-
-        file_format: str.
-            format of the file to save the object
-            {pickle, json}
-
-        """
-
-        # convert obj to byte string
-        if file_format == "pickle":
-            bytestr = pickle.dumps(obj)
-        elif file_format == "json":
-            bytestr = json.dumps(obj)
-        elif file_format == "txt":
-            bytestr = b"{}".format(obj)
-
-        # @TODO add md5 hash
-        # @TODO return success or failure message
-        # put in S3
-        r = self.client.put_object(
-            Bucket=bucket_name,
-            Key=object_key,
-            Body=bytestr,
-        )
-
-        return
 
     def multi_part_upload_with_s3(self, obj, bucket_name, object_key, file_format):
         # convert obj to byte string
@@ -140,6 +106,10 @@ class S3Client:
             # return
         elif file_format == "txt":
             bytestr = b"{}".format(obj)
+        elif file_format == "parquet":
+            pq_buffer = BytesIO()
+            obj.to_parquet(pq_buffer, engine="auto", compression="snappy")
+            bytestr = pq_buffer.getvalue()
 
         fileobj = BytesIO(bytestr)
         # size = sys.getsizeof(fileobj)
@@ -230,16 +200,14 @@ class S3Client:
         retr = s3.get_object(Bucket=bucket_name, Key=object_key)
         return pd.read_feather(io.BytesIO(retr["Body"].read()))
 
-
-    def check_file_exists(self, bucket_name, object_key):      
+    def check_file_exists(self, bucket_name, object_key):
 
         try:
-            self.client.head_object(Bucket= bucket_name, Key= object_key)
+            self.client.head_object(Bucket=bucket_name, Key=object_key)
         except ClientError as e:
-            if (int(e.response['Error']['Code']) != 404):
+            if int(e.response["Error"]["Code"]) != 404:
                 return "Failed"
             else:
                 return "Running"
-        
-        return "Complete"
 
+        return "Complete"

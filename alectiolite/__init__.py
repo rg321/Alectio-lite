@@ -9,7 +9,9 @@ import logging
 import alectiolite
 from .init import init_experiment_, extract_config_
 from .curate.classification import UniClassification as curate_classification
-from .logger.logger import experiment_logger,complete_loop
+from .curate.object_detection import ObjectDetection as curate_object_detection
+from .curate.object_segmentation import ObjectSegmentation as curate_object_segmentation
+from .logger.logger import LoggerController, complete_loop
 
 __all__ = [
     "backend",
@@ -17,13 +19,17 @@ __all__ = [
     "proto",
     "callbacks" "init_experiment_",
     "UniClassification",
-    "experiment_logger",
-    "complete_loop"
+    "ObjectDetection",
+    "ObjectSegmentation",
+    "LoggerController",
+    "complete_loop",
 ]
 
 
 init = alectiolite.init_experiment_
 experiment_config = alectiolite.extract_config_
 curate_classification = alectiolite.curate_classification
-alectio_logger = alectiolite.experiment_logger
+curate_object_detection = alectiolite.curate_object_detection
+curate_object_segmentation = alectiolite.curate_object_segmentation
+alectio_logger = alectiolite.LoggerController
 complete_loop = alectiolite.complete_loop

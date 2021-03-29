@@ -8,11 +8,11 @@ _C = CN()
 
 # Backend configs
 _C.SANDBOX_BUCKET = ""
-#_C.BACKEND_IP = "prod-sdk.api.alectio.com"
-_C.BACKEND_IP = "sdk.api.internalalectio.com"
+_C.BACKEND_IP = "prod-sdk.api.alectio.com"
+# _C.BACKEND_IP = "sdk.api.internalalectio.com"
 _C.GRPC_BACKEND = "sdk-stream.api.alectio.com"
 _C.BACKEND_ROUTE = "127.0.0.1:5000/end_of_task"
-_C.PORT =  80
+_C.PORT = 80
 
 # Experiment configs
 _C.STATUS = ""
@@ -27,8 +27,20 @@ _C.N_LOOP = 0.0
 
 
 # File configs
-_C.OUTFILES = ("metrics", "test_predictions", "datasetstate", "logits")
+_C.OUTFILES = (
+    "metrics",
+    "train_predictions",
+    "train_ground_truth",
+    "test_predictions",
+    "test_ground_truth",
+    "datasetstate",
+    "logits",
+    "boxes"
+    "endloop",
+)
 _C.INFILES = ("meta", "labeled_pool", "selected_indices")
+_C.OUT_FORMAT = "parquet"
+_C.DB_INIT = False
 
 # Log directories
 _C.EXPERIMENT_DIR = ""

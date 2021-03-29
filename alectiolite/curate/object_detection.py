@@ -21,11 +21,11 @@ class operations(DefaultCallback):
 
 """
 
-__all__ = ["UniClassification"]
+__all__ = ["ObjectDetection"]
 console = Console(style="green")
 
 
-class UniClassification(init_curation):
+class ObjectDetection(init_curation):
     """
     A class that consumes and preprocesse's model's logits
     ...

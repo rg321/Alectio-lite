@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-#GRPCBACKEND = "50.112.116.244:50051"
+# GRPCBACKEND = "50.112.116.244:50051"
 GRPCBACKEND = "54.218.75.58:50051"
 console = Console(style="bold yellow")
 
@@ -121,4 +121,3 @@ class BackendServer(object):
                 if not ping_server:
                     console.print("Sorry out servers are offline, try again later !")
                     break
-
